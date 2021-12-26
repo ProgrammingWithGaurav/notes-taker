@@ -18,15 +18,17 @@ function New() {
                 content: value
             });
             await setNoteId(result.id);
-            await navigate(`/view/${noteId}`);
-            setValue('');
-            toast({
-                title: 'Notes Created',
-                description: "We've created a note for you.",
-                status: 'info',
-                duration: 2000,
-                isClosable: true,
-            })
+            if (noteId !== null) {
+                await navigate(`/view/${noteId}`);
+                setValue('');
+                toast({
+                    title: 'Notes Created',
+                    description: "We've created a note for you.",
+                    status: 'info',
+                    duration: 2000,
+                    isClosable: true,
+                })
+            }
         } else {
             toast({
                 title: 'Notes cannot be blank.',
