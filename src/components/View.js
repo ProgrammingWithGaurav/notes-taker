@@ -18,18 +18,41 @@ import {
     Flex,
     Input
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaEdit as EditIcon } from "react-icons/fa";
 import { IoIosLink as LinkIcon } from "react-icons/io";
+import { useParams } from 'react-router-dom';
+import db from '../firebase';
 
 function View() {
+    const { id } = useParams();
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const { hasCopied, onCopy } = useClipboard('hello')
+    const { hasCopied, onCopy } = useClipboard(`https://notes-taker.web.app/view/${id}`)
+    const [note, setNote] = useState(null);
+    const [notes, setNotes] = useState([]);
+
+    useEffect(() => {
+        db.collection('notes_taker_notes')
+            .onSnapshot(snapshot => setNotes(snapshot.docs.map(doc => (
+                {
+                    id: doc.id,
+                    data: doc.data(),
+                }
+            ))))
+
+    }, [])
+    useEffect(() => {
+        const currentNote = notes.filter(note => {
+            return note.id === id
+        })
+        setNote(currentNote[0]);
+    }, [notes])
+
     return (
         <Container marginY={5} maxW='container.xl'>
             <Stack direction='row' h='100px' p={4} bg='gray.100' borderRadius={5}>
                 <Divider orientation='vertical' />
-                <Text>Hello, This is the best note in the world.</Text>
+                <Text>{note?.data.content}</Text>
             </Stack>
 
             <Container marginY={5} maxW='container.xl'>
@@ -60,7 +83,7 @@ function View() {
                     <ModalCloseButton />
                     <ModalBody>
                         <Flex mb={2}>
-                            <Input value='hello' isReadOnly/>
+                            <Input value={`https://notes-taker.web.app/view/${id}`} isReadOnly />
                             <Button onClick={onCopy} ml={2}>
                                 {hasCopied ? 'Copied' : 'Copy'}
                             </Button>
