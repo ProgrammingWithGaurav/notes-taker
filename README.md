@@ -1,4 +1,5 @@
 # Multiplayer notebook
+- live site : https://notes-taker.web.app/
 
 ## Made with 
 - chakra ui
