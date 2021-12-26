@@ -21,7 +21,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { FaEdit as EditIcon } from "react-icons/fa";
 import { IoIosLink as LinkIcon } from "react-icons/io";
-import { useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import db from '../firebase';
 
 function View() {
@@ -29,35 +29,29 @@ function View() {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { hasCopied, onCopy } = useClipboard(`https://notes-taker.web.app/view/${id}`)
     const [note, setNote] = useState(null);
-    const [notes, setNotes] = useState([]);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        db.collection('notes_taker_notes')
-            .onSnapshot(snapshot => setNotes(snapshot.docs.map(doc => (
-                {
-                    id: doc.id,
-                    data: doc.data(),
-                }
-            ))))
-
+    useEffect(async () => {
+        const ref = db.collection('notes_taker_notes').doc(id);
+        const doc = await ref.get();
+        if (!doc.exists) {
+            console.log('No such document!');
+        } else {
+            setNote(doc.data())
+        }
     }, [])
-    useEffect(() => {
-        const currentNote = notes.filter(note => {
-            return note.id === id
-        })
-        setNote(currentNote[0]);
-    }, [notes])
 
     return (
         <Container marginY={5} maxW='container.xl'>
             <Stack direction='row' h='100px' p={4} bg='gray.100' borderRadius={5}>
                 <Divider orientation='vertical' />
-                <Text>{note?.data.content}</Text>
+                <Text>{note?.content}</Text>
             </Stack>
 
             <Container marginY={5} maxW='container.xl'>
                 <Tooltip label="Edit" aria-label='A tooltip'>
                     <IconButton
+                        onClick={() => navigate(`/edit/${id}`)}
                         colorScheme='teal'
                         aria-label='Call Segun'
                         size='lg'
